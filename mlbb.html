@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLBB Tournament Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-purple: #bc13fe;
+            --dark-bg: #0d1117; /* GitHub Dark theme background */
+            --card-bg: #161b22; /* Slightly lighter for cards */
+            --text-color: #c9d1d9; /* Light grey text */
+            --border-color: #30363d;
+            --glow-filter: drop-shadow(0 0 5px rgba(0, 242, 255, 0.5)) drop-shadow(0 0 10px rgba(188, 19, 254, 0.3));
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* MLBB Logo Background Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 150vh; /* Adjust size as needed */
+            height: 150vh;
+            background: url('https://upload.wikimedia.org/wikipedia/en/2/2f/Mobile_Legends_Bang_Bang_logo.png') no-repeat center center; /* MLBB logo URL */
+            background-size: contain;
+            opacity: 0.03; /* Very subtle */
+            transform: translate(-50%, -50%) rotate(-15deg); /* Slight rotation */
+            z-index: -1; /* Behind content */
+            filter: blur(5px) var(--glow-filter);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            padding: 30px 20px;
+            z-index: 1; /* Above background */
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 40px 0;
+            filter: var(--glow-filter);
+        }
+
+        /* Card Styling */
+        .glass-card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            margin-bottom: 40px;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            min-width: 600px; /* For responsive table */
+        }
+
+        th {
+            padding: 18px;
+            text-align: center;
+            border-bottom: 2px solid var(--neon-purple);
+            color: var(--neon-blue);
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        tr:hover {
+            background-color: rgba(188, 19, 254, 0.08);
+            transition: 0.3s ease;
+        }
+
+        .rank-circle {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.15);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        /* Rank Colors */
+        .rank-1 .rank-circle { background: #ffd700; color: #000; box-shadow: 0 0 10px #ffd700; }
+        .rank-2 .rank-circle { background: #c0c0c0; color: #000; }
+        .rank-3 .rank-circle { background: #cd7f32; color: #000; }
+
+        .team-name-cell {
+            text-align: left;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .pts { color: var(--neon-blue); font-weight: 900; font-size: 1.1rem; }
+        .win-streak {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: #28a745;
+            color: white;
+            margin-left: 8px;
+            box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+        }
+
+        /* Match Results Styling */
+        .match-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .match-card-result {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .match-card-result::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 5px;
+            background: var(--neon-blue);
+            filter: drop-shadow(0 0 5px var(--neon-blue));
+        }
+
+        .team-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .team-name-result {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .score-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 5px;
+            gap: 10px;
+        }
+
+        .score-box {
+            background: rgba(188, 19, 254, 0.2);
+            border: 1px solid var(--neon-purple);
+            color: var(--neon-blue);
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(188, 19, 254, 0.4);
+        }
+
+        .vs-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: #ff4b2b;
+            font-weight: bold;
+            margin: 0 15px;
+            filter: drop_shadow(0 0 5px #ff4b2b);
+        }
+
+        .match-meta-info {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        /* Upcoming Matches */
+        .upcoming-match-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--neon-blue);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
+        }
+
+        .upcoming-match-card .team-names {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .upcoming-match-card .details {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .watch-btn {
+            background: var(--neon-purple);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 10px rgba(188, 19, 254, 0.4);
+        }
+
+        .watch-btn:hover {
+            background: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.6);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🏆 MLBB Tournament Leaderboard</h2>
+
+    <div class="glass-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th style="text-align: left;">Team Name</th>
+                    <th>MP</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>GD</th>
+                    <th>PTS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="rank-1">
+                    <td><div class="rank-circle">1</div></td>
+                    <td class="team-name-cell">KZMyo <span class="win-streak">2W</span></td>
+                    <td>2</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>+8</td>
+                    <td class="pts">14</td>
+                </tr>
+                <tr class="rank-2">
+                    <td><div class="rank-circle">2</div></td>
+                    <td class="team-name-cell">STM</td>
+                    <td>2</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>+8</td>
+                    <td class="pts">13</td>
+                </tr>
+                <tr class="rank-3">
+                    <td><div class="rank-circle">3</div></td>
+                    <td class="team-name-cell">KZMaung</td>
+                    <td>2</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>+0</td>
+                    <td class="pts">4</td>
+                </tr>
+                <tr>
+                    <td><div class="rank-circle">4</div></td>
+                    <td class="team-name-cell">THS</td>
+                    <td>2</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="pts">2</td>
+                </tr>
+                <tr>
+                    <td><div class="rank-circle">5</div></td>
+                    <td class="team-name-cell">BB</td>
+                    <td>2</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="pts">2</td>
+                </tr>
+                <tr>
+                    <td><div class="rank-circle">6</div></td>
+                    <td class="team-name-cell">CNW</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="pts">-4</td>
+                </tr>
+                <tr>
+                    <td><div class="rank-circle">7</div></td>
+                    <td class="team-name-cell">TZK</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td class="pts">-4</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>🎮 Match Results (BO3)</h2>
+    <div class="match-list">
+        <div class="match-card-result">
+            <div class="team-info">
+                <span class="team-name-result">TZK</span>
+                <span class="score-box">-</span>
+            </div>
+            <span class="vs-text">VS</span>
+            <div class="team-info">
+                <span class="score-box">2</span>
+                <span class="team-name-result">STM</span>
+            </div>
+            <span class="match-meta-info">BO3 - Finished</span>
+        </div>
+
+        <div class="match-card-result">
+            <div class="team-info">
+                <span class="team-name-result">THS</span>
+                <span class="score-box">-</span>
+            </div>
+            <span class="vs-text">VS</span>
+            <div class="team-info">
+                <span class="score-box">2</span>
+                <span class="team-name-result">KZMaung</span>
+            </div>
+            <span class="match-meta-info">BO3 - Finished</span>
+        </div>
+      <div class="match-card-result">
+            <div class="team-info">
+                <span class="team-name-result">KZMyo</span>
+                <span class="score-box">2</span>
+            </div>
+            <span class="vs-text">VS</span>
+            <div class="team-info">
+                <span class="score-box">-</span>
+                <span class="team-name-result">TZK</span>
+            </div>
+            <span class="match-meta-info">BO3 - Finished</span>
+        </div>
+      <div class="match-card-result">
+            <div class="team-info">
+                <span class="team-name-result">KZMaung</span>
+                <span class="score-box">1</span>
+            </div>
+            <span class="vs-text">VS</span>
+            <div class="team-info">
+                <span class="score-box">2</span>
+                <span class="team-name-result">STM</span>
+            </div>
+            <span class="match-meta-info">BO3 - Finished</span>
+        </div>
+      <div class="match-card-result">
+            <div class="team-info">
+                <span class="team-name-result">KZMyo</span>
+                <span class="score-box">2</span>
+            </div>
+            <span class="vs-text">VS</span>
+            <div class="team-info">
+                <span class="score-box">-</span>
+                <span class="team-name-result">BB</span>
+            </div>
+            <span class="match-meta-info">BO3 - Finished</span>
+        </div>
+
+        <div class="match-card-result">
+            <div class="team-info">
+                <span class="team-name-result">THS</span>
+                <span class="score-box">2</span>
+            </div>
+            <span class="vs-text">VS</span>
+            <div class="team-info">
+                <span class="score-box">-</span>
+                <span class="team-name-result">CNW</span>
+            </div>
+            <span class="match-meta-info">BO3 - Finished</span>
+        </div>
+
+        
+    <h2>📅 Upcoming Matches</h2>
+    <div class="match-list">
+        <div class="upcoming-match-card">
+            <div>
+                <div class="team-names">KZMyo <span class="vs-text" style="font-size:0.9rem;">VS</span> STM</div>
+                <div class="details">Tmorrow - 9:00 PM (BO3)</div>
+            </div>
+            <button class="watch-btn">Watch Live</button>
+        </div>
+
+        <div class="upcoming-match-card">
+            <div>
+                <div class="team-names">TZK <span class="vs-text" style="font-size:0.9rem;">VS</span> THS</div>
+                <div class="details">Tomorrow - 8:30 PM (BO3)</div>
+            </div>
+            <button class="watch-btn">Watch Live</button>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
